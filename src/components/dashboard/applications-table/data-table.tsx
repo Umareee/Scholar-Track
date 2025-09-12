@@ -111,13 +111,13 @@ export function DataTable<TData, TValue>({
                 <React.Fragment key={row.id}>
                 <TableRow
                   data-state={row.getIsSelected() && "selected"}
-                  onClick={() => row.toggleExpanded()}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id} onClick={(e) => {
-                        // Stop propagation for interactive elements like popovers and selects
                         if (cell.column.id === 'documents' || cell.column.id === 'status' || cell.column.id === 'priority' || cell.column.id === 'actions' || cell.column.id === 'expander') {
                             e.stopPropagation();
+                        } else {
+                            row.toggleExpanded();
                         }
                     }}>
                       {flexRender(

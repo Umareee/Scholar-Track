@@ -2,7 +2,6 @@
 
 import { Table } from "@tanstack/react-table";
 import { Input } from "@/components/ui/input";
-import { ALL_STATUSES } from "@/lib/types";
 import { DataTableFacetedFilter } from "./data-table-faceted-filter";
 import { Award, ListTodo, Loader2, Send, XCircle } from "lucide-react";
 
@@ -10,7 +9,7 @@ interface DataTableToolbarProps<TData> {
   table: Table<TData>;
 }
 
-const statusIcons = [
+const statusOptions = [
     { value: 'Not Started', label: 'Not Started', icon: ListTodo },
     { value: 'In Progress', label: 'In Progress', icon: Loader2 },
     { value: 'Submitted', label: 'Submitted', icon: Send },
@@ -40,7 +39,7 @@ export function DataTableToolbar<TData>({
           <DataTableFacetedFilter
             column={table.getColumn("status")}
             title="Status"
-            options={statusIcons}
+            options={statusOptions}
           />
         )}
       </div>
