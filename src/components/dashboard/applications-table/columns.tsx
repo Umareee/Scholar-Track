@@ -3,31 +3,47 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { format, differenceInDays, isPast } from "date-fns";
 import { Badge } from "@/components/ui/badge";
-import { ScholarshipApplication, Document } from "@/lib/types";
+import { ScholarshipApplication, Document, ALL_STATUSES } from "@/lib/types";
 import { DataTableRowActions } from "./data-table-row-actions";
 import { cn } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Check, GripVertical, PlusCircle, ChevronDown } from "lucide-react";
+import { GripVertical, PlusCircle, Notebook } from "lucide-react";
 import React from "react";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const DeadlineDisplay = ({ deadline }: { deadline: string }) => {
   const deadlineDate = new Date(deadline);
   const now = new Date();
   const daysRemaining = differenceInDays(deadlineDate, now);
 
-  if (isPast(deadlineDate)) {
-    return <span className="text-destructive font-medium">Overdue</span>;
+  if (isPast(deadlineDate) && daysRemaining !== 0) {
+    return <span className="text-destructive font-medium">Overdue ({format(deadlineDate, "PPP")})</span>;
   }
+  
+  let colorClass = "";
   if (daysRemaining < 7) {
-    return <span className="text-destructive font-medium">{format(deadlineDate, "PPP")}</span>;
+    colorClass = "text-destructive font-medium";
+  } else if (daysRemaining < 30) {
+    colorClass = "text-yellow-600 dark:text-yellow-500 font-medium";
   }
-  if (daysRemaining < 30) {
-    return <span className="text-yellow-600 dark:text-yellow-500 font-medium">{format(deadlineDate, "PPP")}</span>;
-  }
-  return <span>{format(deadlineDate, "PPP")}</span>;
+
+  return (
+    <div className="flex flex-col">
+      <span className={colorClass}>{format(deadlineDate, "PPP")}</span>
+      <span className="text-sm text-muted-foreground">
+        {daysRemaining >= 0 ? `${daysRemaining} days left` : ''}
+      </span>
+    </div>
+  );
 };
 
 const statusVariantMap: { [key: string]: "default" | "secondary" | "destructive" | "outline" } = {
@@ -130,15 +146,11 @@ export const columns = ({ onEdit, onDelete, onApplicationUpdate }: { onEdit: (ap
             disabled={!row.getCanExpand()}
             className="h-8 w-8"
         >
-            <ChevronDown
-            className={cn(
-                'h-4 w-4 transition-transform',
-                row.getIsExpanded() && 'rotate-180'
-            )}
-            />
+            <Notebook className="h-4 w-4 text-muted-foreground" />
         </Button>
       )
     },
+    size: 40,
   },
   {
     accessorKey: "scholarshipName",
@@ -168,9 +180,29 @@ export const columns = ({ onEdit, onDelete, onApplicationUpdate }: { onEdit: (ap
     accessorKey: "status",
     header: "Status",
     cell: ({ row }) => {
-        const status = row.original.status;
-        const variant = statusVariantMap[status] || "outline";
-        return <Badge variant={variant} className={cn(status === 'Accepted' && 'bg-green-600 text-white')}>{status}</Badge>;
+        const application = row.original;
+        return (
+          <Select 
+            value={application.status} 
+            onValueChange={(status) => onApplicationUpdate({ ...application, status: status as any })}
+          >
+            <SelectTrigger className="w-36 h-8 text-xs px-2 py-1">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {ALL_STATUSES.map(status => (
+                <SelectItem key={status} value={status}>
+                  <Badge 
+                    variant={statusVariantMap[status] || "outline"} 
+                    className={cn("text-xs", status === 'Accepted' && 'bg-green-600 text-white')}
+                  >
+                    {status}
+                  </Badge>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        );
     },
     filterFn: (row, id, value) => {
         return value.includes(row.getValue(id));
