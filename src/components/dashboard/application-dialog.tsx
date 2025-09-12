@@ -82,7 +82,7 @@ export function ApplicationDialog({
         university: "",
         country: "",
         status: "Not Started",
-        priority: "Medium",
+        priority: "None",
         documents: DOCUMENT_CHECKLIST_ITEMS.map(name => ({ name, checked: false })),
         notes: "",
       };

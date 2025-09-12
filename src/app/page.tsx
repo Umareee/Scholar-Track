@@ -27,7 +27,7 @@ export default function Home() {
     React.useState<ScholarshipApplication | null>(null);
 
   const sortedApplications = React.useMemo(() => {
-    const priorityOrder: Record<Priority, number> = { High: 1, Medium: 2, Low: 3 };
+    const priorityOrder: Record<Priority, number> = { High: 1, Medium: 2, Low: 3, None: 4 };
     
     return [...applications].sort((a, b) => {
       const aIsOverdue = isPast(new Date(a.deadline)) && differenceInDays(new Date(a.deadline), new Date()) < 0;
@@ -36,8 +36,8 @@ export default function Home() {
       if (aIsOverdue && !bIsOverdue) return 1;
       if (!aIsOverdue && bIsOverdue) return -1;
       
-      const priorityA = priorityOrder[a.priority] || 4;
-      const priorityB = priorityOrder[b.priority] || 4;
+      const priorityA = priorityOrder[a.priority] || 5;
+      const priorityB = priorityOrder[b.priority] || 5;
 
       if (priorityA !== priorityB) {
         return priorityA - priorityB;
@@ -108,14 +108,14 @@ export default function Home() {
   ];
 
   return (
-    <div className="flex min-h-screen w-full flex-col">
+    <div className="flex min-h-screen w-full flex-col bg-background">
       <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm md:px-6">
         <div className="flex items-center gap-2">
             <BookMarked className="h-7 w-7 text-primary" />
             <h1 className="text-2xl font-semibold text-foreground">ScholarTrack</h1>
         </div>
         <div className="ml-auto">
-          <Button onClick={handleAddNew}>
+          <Button onClick={handleAddNew} variant="outline" className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground">
             <PlusCircle className="mr-2 h-4 w-4" />
             Add Application
           </Button>
@@ -132,7 +132,7 @@ export default function Home() {
             />
           ))}
         </div>
-        <div className="rounded-lg border shadow-sm">
+        <div className="rounded-lg border shadow-sm bg-card">
           <DataTable
             columns={columns({ onEdit: handleEdit, onDelete: handleDelete, onApplicationUpdate: handleSave })}
             data={sortedApplications}

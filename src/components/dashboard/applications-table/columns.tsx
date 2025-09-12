@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { GripVertical, PlusCircle, Notebook, Flag } from "lucide-react";
+import { GripVertical, PlusCircle, Notebook, Flag, Dot } from "lucide-react";
 import React from "react";
 import { Input } from "@/components/ui/input";
 import {
@@ -58,6 +58,7 @@ const priorityColorMap: Record<Priority, string> = {
     High: "text-red-500",
     Medium: "text-yellow-500",
     Low: "text-green-500",
+    None: "text-gray-500"
 };
 
 
@@ -188,6 +189,7 @@ export const columns = ({ onEdit, onDelete, onApplicationUpdate }: { onEdit: (ap
     header: "Priority",
     cell: ({ row }) => {
       const application = row.original;
+      const Icon = application.priority === 'None' ? Dot : Flag;
       return (
         <Select
           value={application.priority}
@@ -198,20 +200,22 @@ export const columns = ({ onEdit, onDelete, onApplicationUpdate }: { onEdit: (ap
           <SelectTrigger className="w-32 h-8 text-xs px-2 py-1">
             <SelectValue>
               <div className="flex items-center gap-2">
-                <Flag className={cn("h-4 w-4", priorityColorMap[application.priority])} />
+                <Icon className={cn("h-4 w-4", priorityColorMap[application.priority])} />
                 {application.priority}
               </div>
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
-            {ALL_PRIORITIES.map((priority) => (
+            {ALL_PRIORITIES.map((priority) => {
+              const ItemIcon = priority === 'None' ? Dot : Flag;
+              return (
               <SelectItem key={priority} value={priority}>
                 <div className="flex items-center gap-2">
-                  <Flag className={cn("h-4 w-4", priorityColorMap[priority])} />
+                  <ItemIcon className={cn("h-4 w-4", priorityColorMap[priority])} />
                   {priority}
                 </div>
               </SelectItem>
-            ))}
+            )})}
           </SelectContent>
         </Select>
       );

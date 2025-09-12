@@ -1,8 +1,8 @@
 export type ApplicationStatus = 'Not Started' | 'In Progress' | 'Submitted' | 'Accepted' | 'Rejected';
 export const ALL_STATUSES: ApplicationStatus[] = ['Not Started', 'In Progress', 'Submitted', 'Accepted', 'Rejected'];
 
-export type Priority = 'High' | 'Medium' | 'Low';
-export const ALL_PRIORITIES: Priority[] = ['High', 'Medium', 'Low'];
+export type Priority = 'High' | 'Medium' | 'Low' | 'None';
+export const ALL_PRIORITIES: Priority[] = ['High', 'Medium', 'Low', 'None'];
 
 export const DOCUMENT_CHECKLIST_ITEMS = ["CV/Resume", "Personal Statement", "Recommendation Letters", "Transcripts"] as const;
 
