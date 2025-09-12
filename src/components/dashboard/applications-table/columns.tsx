@@ -3,13 +3,13 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { format, differenceInDays, isPast } from "date-fns";
 import { Badge } from "@/components/ui/badge";
-import { ScholarshipApplication, Document, ALL_STATUSES } from "@/lib/types";
+import { ScholarshipApplication, ALL_STATUSES, Priority, ALL_PRIORITIES } from "@/lib/types";
 import { DataTableRowActions } from "./data-table-row-actions";
 import { cn } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { GripVertical, PlusCircle, Notebook } from "lucide-react";
+import { GripVertical, PlusCircle, Notebook, Flag } from "lucide-react";
 import React from "react";
 import { Input } from "@/components/ui/input";
 import {
@@ -25,7 +25,7 @@ const DeadlineDisplay = ({ deadline }: { deadline: string }) => {
   const now = new Date();
   const daysRemaining = differenceInDays(deadlineDate, now);
 
-  if (isPast(deadlineDate) && daysRemaining !== 0) {
+  if (isPast(deadlineDate) && daysRemaining < 0) {
     return <span className="text-destructive font-medium">Overdue ({format(deadlineDate, "PPP")})</span>;
   }
   
@@ -53,6 +53,13 @@ const statusVariantMap: { [key: string]: "default" | "secondary" | "destructive"
   "Not Started": "outline",
   "Rejected": "destructive",
 };
+
+const priorityColorMap: Record<Priority, string> = {
+    High: "text-red-500",
+    Medium: "text-yellow-500",
+    Low: "text-green-500",
+};
+
 
 const DocumentChecklist = ({ 
   application,
@@ -86,7 +93,7 @@ const DocumentChecklist = ({
       <div className="flex items-center gap-2">
         <Popover>
           <PopoverTrigger asChild>
-            <Button variant="outline" size="sm" className="h-8">
+            <Button variant="outline" size="sm" className="h-8" onClick={(e) => e.stopPropagation()}>
               <GripVertical className="mr-2 h-4 w-4" />
               <span>{`${checkedCount}/${totalCount}`}</span>
             </Button>
@@ -142,7 +149,7 @@ export const columns = ({ onEdit, onDelete, onApplicationUpdate }: { onEdit: (ap
         <Button
             variant="ghost"
             size="icon"
-            onClick={row.getToggleExpandedHandler()}
+            onClick={(e) => { e.stopPropagation(); row.toggleExpanded();}}
             disabled={!row.getCanExpand()}
             className="h-8 w-8"
         >
@@ -175,6 +182,43 @@ export const columns = ({ onEdit, onDelete, onApplicationUpdate }: { onEdit: (ap
     accessorKey: "documents",
     header: "Documents",
     cell: ({ row }) => <DocumentChecklist application={row.original} onApplicationUpdate={onApplicationUpdate} />,
+  },
+  {
+    accessorKey: "priority",
+    header: "Priority",
+    cell: ({ row }) => {
+      const application = row.original;
+      return (
+        <Select
+          value={application.priority}
+          onValueChange={(priority) =>
+            onApplicationUpdate({ ...application, priority: priority as Priority })
+          }
+        >
+          <SelectTrigger className="w-32 h-8 text-xs px-2 py-1">
+            <SelectValue>
+              <div className="flex items-center gap-2">
+                <Flag className={cn("h-4 w-4", priorityColorMap[application.priority])} />
+                {application.priority}
+              </div>
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            {ALL_PRIORITIES.map((priority) => (
+              <SelectItem key={priority} value={priority}>
+                <div className="flex items-center gap-2">
+                  <Flag className={cn("h-4 w-4", priorityColorMap[priority])} />
+                  {priority}
+                </div>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      );
+    },
+    filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id));
+    },
   },
   {
     accessorKey: "status",

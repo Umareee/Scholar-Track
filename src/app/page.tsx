@@ -10,13 +10,14 @@ import {
   Send,
   XCircle,
 } from "lucide-react";
-import { ApplicationStatus, ScholarshipApplication } from "@/lib/types";
+import { ApplicationStatus, ScholarshipApplication, Priority } from "@/lib/types";
 import { initialApplications } from "@/lib/data";
 import { Button } from "@/components/ui/button";
 import StatusCard from "@/components/dashboard/status-card";
 import { ApplicationDialog } from "@/components/dashboard/application-dialog";
 import { DataTable } from "@/components/dashboard/applications-table/data-table";
 import { columns } from "@/components/dashboard/applications-table/columns";
+import { differenceInDays, isPast } from "date-fns";
 
 export default function Home() {
   const [applications, setApplications] =
@@ -24,6 +25,27 @@ export default function Home() {
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [editingApplication, setEditingApplication] =
     React.useState<ScholarshipApplication | null>(null);
+
+  const sortedApplications = React.useMemo(() => {
+    const priorityOrder: Record<Priority, number> = { High: 1, Medium: 2, Low: 3 };
+    
+    return [...applications].sort((a, b) => {
+      const aIsOverdue = isPast(new Date(a.deadline)) && differenceInDays(new Date(a.deadline), new Date()) < 0;
+      const bIsOverdue = isPast(new Date(b.deadline)) && differenceInDays(new Date(b.deadline), new Date()) < 0;
+
+      if (aIsOverdue && !bIsOverdue) return 1;
+      if (!aIsOverdue && bIsOverdue) return -1;
+      
+      const priorityA = priorityOrder[a.priority] || 4;
+      const priorityB = priorityOrder[b.priority] || 4;
+
+      if (priorityA !== priorityB) {
+        return priorityA - priorityB;
+      }
+      
+      return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
+    });
+  }, [applications]);
 
   const statusCounts = React.useMemo(() => {
     return applications.reduce((acc, app) => {
@@ -113,7 +135,7 @@ export default function Home() {
         <div className="rounded-lg border shadow-sm">
           <DataTable
             columns={columns({ onEdit: handleEdit, onDelete: handleDelete, onApplicationUpdate: handleSave })}
-            data={applications}
+            data={sortedApplications}
           />
         </div>
       </main>

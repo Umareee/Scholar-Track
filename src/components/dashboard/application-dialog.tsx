@@ -35,7 +35,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Calendar as CalendarIcon, PlusCircle, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { ALL_STATUSES, DOCUMENT_CHECKLIST_ITEMS, ScholarshipApplication, DocumentName } from "@/lib/types";
+import { ALL_STATUSES, DOCUMENT_CHECKLIST_ITEMS, ScholarshipApplication, ALL_PRIORITIES } from "@/lib/types";
 import { useEffect, useState } from "react";
 import { ScrollArea } from "../ui/scroll-area";
 
@@ -50,6 +50,7 @@ const formSchema = z.object({
   country: z.string().min(2, "Country is required."),
   deadline: z.date({ required_error: "A deadline date is required." }),
   status: z.enum(ALL_STATUSES),
+  priority: z.enum(ALL_PRIORITIES),
   documents: z.array(documentSchema),
   notes: z.string().optional(),
 });
@@ -81,6 +82,7 @@ export function ApplicationDialog({
         university: "",
         country: "",
         status: "Not Started",
+        priority: "Medium",
         documents: DOCUMENT_CHECKLIST_ITEMS.map(name => ({ name, checked: false })),
         notes: "",
       };
@@ -235,6 +237,29 @@ export function ApplicationDialog({
                   )}
                 />
               </div>
+
+               <FormField
+                control={form.control}
+                name="priority"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Priority</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a priority" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {ALL_PRIORITIES.map(priority => (
+                          <SelectItem key={priority} value={priority}>{priority}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
                <FormItem>
                 <FormLabel>Documents Checklist</FormLabel>

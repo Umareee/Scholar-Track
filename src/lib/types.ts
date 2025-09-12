@@ -1,6 +1,8 @@
 export type ApplicationStatus = 'Not Started' | 'In Progress' | 'Submitted' | 'Accepted' | 'Rejected';
-
 export const ALL_STATUSES: ApplicationStatus[] = ['Not Started', 'In Progress', 'Submitted', 'Accepted', 'Rejected'];
+
+export type Priority = 'High' | 'Medium' | 'Low';
+export const ALL_PRIORITIES: Priority[] = ['High', 'Medium', 'Low'];
 
 export const DOCUMENT_CHECKLIST_ITEMS = ["CV/Resume", "Personal Statement", "Recommendation Letters", "Transcripts"] as const;
 
@@ -18,6 +20,7 @@ export type ScholarshipApplication = {
   country: string;
   deadline: string; // ISO Date string
   status: ApplicationStatus;
+  priority: Priority;
   documents: Document[];
   notes: string;
 };
