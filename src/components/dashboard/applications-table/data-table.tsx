@@ -111,15 +111,20 @@ export function DataTable<TData, TValue>({
                 <React.Fragment key={row.id}>
                 <TableRow
                   data-state={row.getIsSelected() && "selected"}
+                  onClick={(e) => {
+                    const target = e.target as HTMLElement;
+                    if (target.closest('[data-radix-popper-content-wrapper]') || target.closest('button') || target.closest('a') || target.closest('[role=checkbox]')) {
+                        return;
+                    }
+
+                    if (cell.column.id === 'documents' || cell.column.id === 'status' || cell.column.id === 'priority' || cell.column.id === 'actions' || cell.column.id === 'expander') {
+                        return;
+                    }
+                    row.toggleExpanded();
+                  }}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} onClick={(e) => {
-                        if (cell.column.id === 'documents' || cell.column.id === 'status' || cell.column.id === 'priority' || cell.column.id === 'actions' || cell.column.id === 'expander') {
-                            e.stopPropagation();
-                        } else {
-                            row.toggleExpanded();
-                        }
-                    }}>
+                    <TableCell key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
