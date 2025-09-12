@@ -37,6 +37,7 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { ALL_STATUSES, DOCUMENT_CHECKLIST_ITEMS, ScholarshipApplication, DocumentName } from "@/lib/types";
 import { useEffect, useState } from "react";
+import { ScrollArea } from "../ui/scroll-area";
 
 const documentSchema = z.object({
     name: z.string().min(1, "Document name cannot be empty."),
@@ -117,13 +118,14 @@ export function ApplicationDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[480px]">
+      <DialogContent className="sm:max-w-[480px] grid-rows-[auto_1fr_auto] max-h-[90vh]">
         <DialogHeader>
           <DialogTitle>{application ? "Edit Application" : "Add New Application"}</DialogTitle>
           <DialogDescription>
             Fill in the details of the scholarship application below.
           </DialogDescription>
         </DialogHeader>
+        <ScrollArea className="pr-6 -mr-6">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <div className="grid grid-cols-1 gap-4">
@@ -298,12 +300,13 @@ export function ApplicationDialog({
                 )}
               />
             </div>
-            <DialogFooter>
+            <DialogFooter className="sticky bottom-0 bg-background pt-4">
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
               <Button type="submit">Save Application</Button>
             </DialogFooter>
           </form>
         </Form>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );

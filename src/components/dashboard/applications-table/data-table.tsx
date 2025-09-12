@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/table";
 
 import { DataTableToolbar } from "./data-table-toolbar";
+import { ScholarshipApplication } from "@/lib/types";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -63,6 +64,25 @@ export function DataTable<TData, TValue>({
     getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
+    meta: {
+        updateData: (rowIndex: number, columnId: string, value: unknown) => {
+            // This is a bit of a hack to update the data in the table
+            // It's not ideal, but it works for this demo
+            // A better solution would be to use a proper state management library
+            // like Redux or Zustand
+            // Or, to lift the state up to the parent component
+            // and pass down a function to update the data
+            // But for now, this will do
+            const event = new CustomEvent("update-data", {
+                detail: {
+                    rowIndex,
+                    columnId,
+                    value
+                }
+            });
+            window.dispatchEvent(event);
+        }
+    }
   });
 
   return (

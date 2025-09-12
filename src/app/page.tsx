@@ -47,7 +47,7 @@ export default function Home() {
   };
 
   const handleSave = (appData: ScholarshipApplication) => {
-    if (editingApplication) {
+    if (editingApplication || applications.find(a => a.id === appData.id)) {
       setApplications((prev) =>
         prev.map((app) => (app.id === appData.id ? appData : app))
       );
@@ -112,7 +112,7 @@ export default function Home() {
         </div>
         <div className="rounded-lg border shadow-sm">
           <DataTable
-            columns={columns({ onEdit: handleEdit, onDelete: handleDelete })}
+            columns={columns({ onEdit: handleEdit, onDelete: handleDelete, onApplicationUpdate: handleSave })}
             data={applications}
           />
         </div>

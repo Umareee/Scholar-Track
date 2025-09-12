@@ -9,7 +9,8 @@ import { cn } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Check, GripVertical } from "lucide-react";
+import { Check, GripVertical, PlusCircle } from "lucide-react";
+import React from "react";
 
 const DeadlineDisplay = ({ deadline }: { deadline: string }) => {
   const deadlineDate = new Date(deadline);
@@ -36,7 +37,31 @@ const statusVariantMap: { [key: string]: "default" | "secondary" | "destructive"
   "Rejected": "destructive",
 };
 
-const DocumentChecklist = ({ documents }: { documents: Document[] }) => {
+const DocumentChecklist = ({ 
+  application,
+  onApplicationUpdate,
+}: { 
+  application: ScholarshipApplication,
+  onApplicationUpdate: (app: ScholarshipApplication) => void;
+}) => {
+    const { documents, id } = application;
+    const [newDocumentName, setNewDocumentName] = React.useState("");
+
+    const handleDocumentCheck = (documentName: string, checked: boolean) => {
+        const updatedDocuments = documents.map(doc => 
+            doc.name === documentName ? { ...doc, checked } : doc
+        );
+        onApplicationUpdate({ ...application, documents: updatedDocuments });
+    };
+
+    const handleAddDocument = () => {
+      if (newDocumentName.trim() !== "") {
+        const updatedDocuments = [...documents, { name: newDocumentName.trim(), checked: false }];
+        onApplicationUpdate({ ...application, documents: updatedDocuments });
+        setNewDocumentName("");
+      }
+    };
+    
     const checkedCount = documents.filter((doc) => doc.checked).length;
     const totalCount = documents.length;
   
@@ -54,9 +79,13 @@ const DocumentChecklist = ({ documents }: { documents: Document[] }) => {
               <p className="text-sm font-medium">Documents</p>
               {documents.map((doc, index) => (
                 <div key={index} className="flex items-center space-x-2">
-                  <Checkbox id={`${doc.name}-${index}`} checked={doc.checked} disabled />
+                  <Checkbox 
+                    id={`${id}-${doc.name}-${index}`} 
+                    checked={doc.checked}
+                    onCheckedChange={(checked) => handleDocumentCheck(doc.name, !!checked)}
+                  />
                   <label
-                    htmlFor={`${doc.name}-${index}`}
+                    htmlFor={`${id}-${doc.name}-${index}`}
                     className="text-sm font-normal leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                   >
                     {doc.name}
@@ -64,14 +93,30 @@ const DocumentChecklist = ({ documents }: { documents: Document[] }) => {
                 </div>
               ))}
             </div>
+             <div className="flex items-center space-x-2 mt-4">
+              <input
+                value={newDocumentName}
+                onChange={(e) => setNewDocumentName(e.target.value)}
+                placeholder="Add new document"
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleAddDocument();
+                  }
+                }}
+              />
+              <Button type="button" variant="outline" size="icon" onClick={handleAddDocument} className="h-9 w-9">
+                <PlusCircle className="h-4 w-4" />
+              </Button>
+            </div>
           </PopoverContent>
         </Popover>
-        <span className="text-muted-foreground text-sm">{`${checkedCount}/${totalCount}`}</span>
       </div>
     );
   };
 
-export const columns = ({ onEdit, onDelete }: { onEdit: (app: ScholarshipApplication) => void; onDelete: (id: string) => void }): ColumnDef<ScholarshipApplication>[] => [
+export const columns = ({ onEdit, onDelete, onApplicationUpdate }: { onEdit: (app: ScholarshipApplication) => void; onDelete: (id: string) => void; onApplicationUpdate: (app: ScholarshipApplication) => void; }): ColumnDef<ScholarshipApplication>[] => [
   {
     accessorKey: "scholarshipName",
     header: "Scholarship",
@@ -94,7 +139,7 @@ export const columns = ({ onEdit, onDelete }: { onEdit: (app: ScholarshipApplica
   {
     accessorKey: "documents",
     header: "Documents",
-    cell: ({ row }) => <DocumentChecklist documents={row.original.documents} />,
+    cell: ({ row }) => <DocumentChecklist application={row.original} onApplicationUpdate={onApplicationUpdate} />,
   },
   {
     accessorKey: "status",
