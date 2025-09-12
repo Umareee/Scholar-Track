@@ -4,7 +4,7 @@ export const ALL_STATUSES: ApplicationStatus[] = ['Not Started', 'In Progress', 
 
 export const DOCUMENT_CHECKLIST_ITEMS = ["CV/Resume", "Personal Statement", "Recommendation Letters", "Transcripts"] as const;
 
-export type DocumentName = typeof DOCUMENT_CHECKLIST_ITEMS[number];
+export type DocumentName = typeof DOCUMENT_CHECKLIST_ITEMS[number] | (string & {});
 
 export type Document = {
   name: DocumentName;

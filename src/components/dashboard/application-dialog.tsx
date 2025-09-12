@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import * as z from "zod";
 import {
   Dialog,
@@ -32,11 +32,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { Calendar as CalendarIcon } from "lucide-react";
+import { Calendar as CalendarIcon, PlusCircle, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { ALL_STATUSES, DOCUMENT_CHECKLIST_ITEMS, ScholarshipApplication, DocumentName } from "@/lib/types";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+
+const documentSchema = z.object({
+    name: z.string().min(1, "Document name cannot be empty."),
+    checked: z.boolean(),
+});
 
 const formSchema = z.object({
   scholarshipName: z.string().min(2, "Scholarship name is required."),
@@ -44,10 +49,7 @@ const formSchema = z.object({
   country: z.string().min(2, "Country is required."),
   deadline: z.date({ required_error: "A deadline date is required." }),
   status: z.enum(ALL_STATUSES),
-  documents: z.array(z.object({
-    name: z.string(),
-    checked: z.boolean(),
-  })),
+  documents: z.array(documentSchema),
   notes: z.string().optional(),
 });
 
@@ -66,6 +68,8 @@ export function ApplicationDialog({
   onSave,
   application,
 }: ApplicationDialogProps) {
+  const [newDocumentName, setNewDocumentName] = useState("");
+
   const defaultValues: Partial<ApplicationFormValues> = application
     ? {
         ...application,
@@ -85,6 +89,11 @@ export function ApplicationDialog({
     defaultValues,
   });
 
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "documents"
+  });
+
   useEffect(() => {
     form.reset(defaultValues);
   }, [application, isOpen, form]);
@@ -98,6 +107,13 @@ export function ApplicationDialog({
     onSave(newOrUpdatedApplication);
     onOpenChange(false);
   }
+
+  const handleAddDocument = () => {
+    if (newDocumentName.trim() !== "") {
+      append({ name: newDocumentName.trim(), checked: false });
+      setNewDocumentName("");
+    }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -218,38 +234,51 @@ export function ApplicationDialog({
                 />
               </div>
 
-               <FormField
-                control={form.control}
-                name="documents"
-                render={() => (
-                  <FormItem>
-                    <div className="mb-4">
-                        <FormLabel>Documents Checklist</FormLabel>
-                    </div>
-                    {form.getValues("documents").map((doc, index) => (
-                      <FormField
-                        key={index}
-                        control={form.control}
-                        name={`documents.${index}.checked`}
-                        render={({ field }) => (
-                          <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                            <FormLabel className="font-normal">
-                              {form.getValues(`documents.${index}.name`)}
-                            </FormLabel>
-                          </FormItem>
-                        )}
-                      />
-                    ))}
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+               <FormItem>
+                <FormLabel>Documents Checklist</FormLabel>
+                <div className="space-y-2">
+                  {fields.map((item, index) => (
+                    <FormField
+                      key={item.id}
+                      control={form.control}
+                      name={`documents.${index}`}
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center space-x-3">
+                          <Checkbox
+                            checked={field.value.checked}
+                            onCheckedChange={(checked) => {
+                              field.onChange({ ...field.value, checked: !!checked });
+                            }}
+                          />
+                          <FormControl>
+                            <Input {...field} value={field.value.name} onChange={(e) => field.onChange({...field.value, name: e.target.value})} />
+                          </FormControl>
+                           <Button type="button" variant="ghost" size="icon" onClick={() => remove(index)}>
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                        </FormItem>
+                      )}
+                    />
+                  ))}
+                  <div className="flex items-center space-x-2">
+                    <Input
+                      value={newDocumentName}
+                      onChange={(e) => setNewDocumentName(e.target.value)}
+                      placeholder="Add new document"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleAddDocument();
+                        }
+                      }}
+                    />
+                    <Button type="button" variant="outline" size="icon" onClick={handleAddDocument}>
+                      <PlusCircle className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+                <FormMessage />
+              </FormItem>
 
               <FormField
                 control={form.control}

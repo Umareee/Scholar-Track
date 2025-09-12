@@ -3,10 +3,13 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { format, differenceInDays, isPast } from "date-fns";
 import { Badge } from "@/components/ui/badge";
-import { ScholarshipApplication } from "@/lib/types";
+import { ScholarshipApplication, Document } from "@/lib/types";
 import { DataTableRowActions } from "./data-table-row-actions";
 import { cn } from "@/lib/utils";
-import { Progress } from "@/components/ui/progress";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Check, GripVertical } from "lucide-react";
 
 const DeadlineDisplay = ({ deadline }: { deadline: string }) => {
   const deadlineDate = new Date(deadline);
@@ -33,6 +36,41 @@ const statusVariantMap: { [key: string]: "default" | "secondary" | "destructive"
   "Rejected": "destructive",
 };
 
+const DocumentChecklist = ({ documents }: { documents: Document[] }) => {
+    const checkedCount = documents.filter((doc) => doc.checked).length;
+    const totalCount = documents.length;
+  
+    return (
+      <div className="flex items-center gap-2">
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" size="sm" className="h-8">
+              <GripVertical className="mr-2 h-4 w-4" />
+              <span>{`${checkedCount}/${totalCount}`}</span>
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-64 p-2">
+            <div className="space-y-2">
+              <p className="text-sm font-medium">Documents</p>
+              {documents.map((doc, index) => (
+                <div key={index} className="flex items-center space-x-2">
+                  <Checkbox id={`${doc.name}-${index}`} checked={doc.checked} disabled />
+                  <label
+                    htmlFor={`${doc.name}-${index}`}
+                    className="text-sm font-normal leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    {doc.name}
+                  </label>
+                </div>
+              ))}
+            </div>
+          </PopoverContent>
+        </Popover>
+        <span className="text-muted-foreground text-sm">{`${checkedCount}/${totalCount}`}</span>
+      </div>
+    );
+  };
+
 export const columns = ({ onEdit, onDelete }: { onEdit: (app: ScholarshipApplication) => void; onDelete: (id: string) => void }): ColumnDef<ScholarshipApplication>[] => [
   {
     accessorKey: "scholarshipName",
@@ -55,18 +93,8 @@ export const columns = ({ onEdit, onDelete }: { onEdit: (app: ScholarshipApplica
   },
   {
     accessorKey: "documents",
-    header: "Documents Progress",
-    cell: ({ row }) => {
-      const docs = row.original.documents;
-      const checkedCount = docs.filter(doc => doc.checked).length;
-      const progress = (checkedCount / docs.length) * 100;
-      return (
-        <div className="flex items-center gap-2">
-            <Progress value={progress} className="w-[60%]" />
-            <span className="text-muted-foreground text-sm">{`${checkedCount}/${docs.length}`}</span>
-        </div>
-      );
-    }
+    header: "Documents",
+    cell: ({ row }) => <DocumentChecklist documents={row.original.documents} />,
   },
   {
     accessorKey: "status",
