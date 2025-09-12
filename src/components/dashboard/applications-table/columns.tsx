@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScholarshipApplication } from "@/lib/types";
 import { DataTableRowActions } from "./data-table-row-actions";
 import { cn } from "@/lib/utils";
+import { Progress } from "@/components/ui/progress";
 
 const DeadlineDisplay = ({ deadline }: { deadline: string }) => {
   const deadlineDate = new Date(deadline);
@@ -51,6 +52,21 @@ export const columns = ({ onEdit, onDelete }: { onEdit: (app: ScholarshipApplica
     accessorKey: "deadline",
     header: "Deadline",
     cell: ({ row }) => <DeadlineDisplay deadline={row.original.deadline} />,
+  },
+  {
+    accessorKey: "documents",
+    header: "Documents Progress",
+    cell: ({ row }) => {
+      const docs = row.original.documents;
+      const checkedCount = docs.filter(doc => doc.checked).length;
+      const progress = (checkedCount / docs.length) * 100;
+      return (
+        <div className="flex items-center gap-2">
+            <Progress value={progress} className="w-[60%]" />
+            <span className="text-muted-foreground text-sm">{`${checkedCount}/${docs.length}`}</span>
+        </div>
+      );
+    }
   },
   {
     accessorKey: "status",
