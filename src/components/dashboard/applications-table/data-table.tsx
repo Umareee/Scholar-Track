@@ -14,6 +14,8 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
+  getExpandedRowModel,
+  ExpandedState,
 } from "@tanstack/react-table";
 
 import {
@@ -33,6 +35,16 @@ interface DataTableProps<TData, TValue> {
   data: TData[];
 }
 
+const renderSubComponent = ({ row }: { row: any }) => {
+    const notes = row.original.notes;
+    return (
+      <div className="bg-muted/50 p-4">
+        <h4 className="font-semibold mb-2">Notes</h4>
+        <p className="text-sm text-muted-foreground">{notes || "No notes provided."}</p>
+      </div>
+    )
+  }
+
 export function DataTable<TData, TValue>({
   columns,
   data,
@@ -43,6 +55,7 @@ export function DataTable<TData, TValue>({
   const [columnFilters, setColumnFilters] =
     React.useState<ColumnFiltersState>([]);
   const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [expanded, setExpanded] = React.useState<ExpandedState>({});
 
   const table = useReactTable({
     data,
@@ -52,18 +65,22 @@ export function DataTable<TData, TValue>({
       columnVisibility,
       rowSelection,
       columnFilters,
+      expanded,
     },
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
+    onExpandedChange: setExpanded,
+    getRowCanExpand: () => true,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
+    getExpandedRowModel: getExpandedRowModel(),
     meta: {
         updateData: (rowIndex: number, columnId: string, value: unknown) => {
             // This is a bit of a hack to update the data in the table
@@ -111,8 +128,8 @@ export function DataTable<TData, TValue>({
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
+                <React.Fragment key={row.id}>
                 <TableRow
-                  key={row.id}
                   data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell) => (
@@ -124,6 +141,14 @@ export function DataTable<TData, TValue>({
                     </TableCell>
                   ))}
                 </TableRow>
+                {row.getIsExpanded() && (
+                    <TableRow>
+                        <TableCell colSpan={columns.length}>
+                            {renderSubComponent({row})}
+                        </TableCell>
+                    </TableRow>
+                )}
+                </React.Fragment>
               ))
             ) : (
               <TableRow>

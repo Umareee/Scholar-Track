@@ -9,8 +9,9 @@ import { cn } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Check, GripVertical, PlusCircle } from "lucide-react";
+import { Check, GripVertical, PlusCircle, ChevronDown } from "lucide-react";
 import React from "react";
+import { Input } from "@/components/ui/input";
 
 const DeadlineDisplay = ({ deadline }: { deadline: string }) => {
   const deadlineDate = new Date(deadline);
@@ -74,7 +75,7 @@ const DocumentChecklist = ({
               <span>{`${checkedCount}/${totalCount}`}</span>
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-64 p-2">
+          <PopoverContent className="w-64 p-2" onClick={(e) => e.stopPropagation()}>
             <div className="space-y-2">
               <p className="text-sm font-medium">Documents</p>
               {documents.map((doc, index) => (
@@ -94,7 +95,7 @@ const DocumentChecklist = ({
               ))}
             </div>
              <div className="flex items-center space-x-2 mt-4">
-              <input
+              <Input
                 value={newDocumentName}
                 onChange={(e) => setNewDocumentName(e.target.value)}
                 placeholder="Add new document"
@@ -117,6 +118,28 @@ const DocumentChecklist = ({
   };
 
 export const columns = ({ onEdit, onDelete, onApplicationUpdate }: { onEdit: (app: ScholarshipApplication) => void; onDelete: (id: string) => void; onApplicationUpdate: (app: ScholarshipApplication) => void; }): ColumnDef<ScholarshipApplication>[] => [
+  {
+    id: 'expander',
+    header: () => null,
+    cell: ({ row }) => {
+      return (
+        <Button
+            variant="ghost"
+            size="icon"
+            onClick={row.getToggleExpandedHandler()}
+            disabled={!row.getCanExpand()}
+            className="h-8 w-8"
+        >
+            <ChevronDown
+            className={cn(
+                'h-4 w-4 transition-transform',
+                row.getIsExpanded() && 'rotate-180'
+            )}
+            />
+        </Button>
+      )
+    },
+  },
   {
     accessorKey: "scholarshipName",
     header: "Scholarship",
