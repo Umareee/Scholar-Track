@@ -51,6 +51,7 @@ const formSchema = z.object({
   deadline: z.date({ required_error: "A deadline date is required." }),
   status: z.enum(ALL_STATUSES),
   priority: z.enum(ALL_PRIORITIES),
+  link: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')),
   documents: z.array(documentSchema),
   notes: z.string().optional(),
 });
@@ -83,6 +84,7 @@ export function ApplicationDialog({
         country: "",
         status: "Not Started",
         priority: "None",
+        link: "",
         documents: DOCUMENT_CHECKLIST_ITEMS.map(name => ({ name, checked: false })),
         notes: "",
       };
@@ -106,6 +108,7 @@ export function ApplicationDialog({
       id: application?.id || crypto.randomUUID(),
       ...values,
       deadline: values.deadline.toISOString(),
+      link: values.link || "",
     };
     onSave(newOrUpdatedApplication);
     onOpenChange(false);
@@ -172,6 +175,19 @@ export function ApplicationDialog({
                   )}
                 />
               </div>
+              <FormField
+                control={form.control}
+                name="link"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Application Link</FormLabel>
+                    <FormControl>
+                      <Input placeholder="https://example.com/scholarship" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <div className="grid grid-cols-2 gap-4">
                  <FormField
                   control={form.control}

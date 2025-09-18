@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { GripVertical, PlusCircle, Notebook, Flag, Dot } from "lucide-react";
+import { GripVertical, PlusCircle, Notebook, Flag, Dot, ExternalLink } from "lucide-react";
 import React from "react";
 import { Input } from "@/components/ui/input";
 import {
@@ -173,6 +173,20 @@ export const columns = ({ onEdit, onDelete, onApplicationUpdate }: { onEdit: (ap
   {
     accessorKey: "country",
     header: "Country",
+  },
+  {
+    accessorKey: "link",
+    header: "Link",
+    cell: ({ row }) => {
+      const { link } = row.original;
+      if (!link) return null;
+      return (
+        <a href={link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-blue-500 hover:underline" onClick={(e) => e.stopPropagation()}>
+          <ExternalLink className="h-4 w-4" />
+          <span>Visit</span>
+        </a>
+      );
+    }
   },
   {
     accessorKey: "deadline",

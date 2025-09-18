@@ -23,4 +23,5 @@ export type ScholarshipApplication = {
   priority: Priority;
   documents: Document[];
   notes: string;
+  link: string;
 };

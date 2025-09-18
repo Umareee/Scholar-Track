@@ -19,6 +19,7 @@ export const initialApplications: ScholarshipApplication[] = [
     priority: 'High',
     documents: DOCUMENT_CHECKLIST_ITEMS.map(name => ({ name, checked: false })),
     notes: 'Requires 5-8 recommendation letters.',
+    link: 'https://www.rhodeshouse.ox.ac.uk/scholarships/the-rhodes-scholarship/',
   },
   {
     id: 'app-2',
@@ -35,6 +36,7 @@ export const initialApplications: ScholarshipApplication[] = [
       { name: 'Transcripts', checked: true },
     ],
     notes: 'Finalizing personal statement. Need to request one more recommendation.',
+    link: 'https://foreign.fulbrightonline.org/about/foreign-fulbright',
   },
   {
     id: 'app-3',
@@ -46,6 +48,7 @@ export const initialApplications: ScholarshipApplication[] = [
     priority: 'Medium',
     documents: DOCUMENT_CHECKLIST_ITEMS.map(name => ({ name, checked: false })),
     notes: 'Minimum two years of work experience required.',
+    link: 'https://www.chevening.org/scholarships/',
   },
   {
     id: 'app-4',
@@ -57,6 +60,7 @@ export const initialApplications: ScholarshipApplication[] = [
     priority: 'None',
     documents: DOCUMENT_CHECKLIST_ITEMS.map(name => ({ name, checked: true })),
     notes: 'Submitted via the DAAD portal on time.',
+    link: 'https://www.daad.de/en/study-and-research-in-germany/scholarships/',
   },
   {
     id: 'app-5',
@@ -73,6 +77,7 @@ export const initialApplications: ScholarshipApplication[] = [
       { name: 'Transcripts', checked: true },
     ],
     notes: 'Drafting the specific Gates Cambridge statement.',
+    link: 'https://www.gatescambridge.org/programme/the-scholarship/',
   },
   {
     id: 'app-6',
@@ -84,6 +89,7 @@ export const initialApplications: ScholarshipApplication[] = [
     priority: 'Low',
     documents: DOCUMENT_CHECKLIST_ITEMS.map(name => ({ name, checked: true })),
     notes: 'Did not pass the first review stage. Re-applying next year.',
+    link: 'https://knight-hennessy.stanford.edu/',
   },
   {
     id: 'app-7',
@@ -95,5 +101,6 @@ export const initialApplications: ScholarshipApplication[] = [
     priority: 'None',
     documents: DOCUMENT_CHECKLIST_ITEMS.map(name => ({ name, checked: true })),
     notes: 'Accepted into the "MARHE" program. Starting in September!',
+    link: 'https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-joint-masters_en',
   },
 ];
