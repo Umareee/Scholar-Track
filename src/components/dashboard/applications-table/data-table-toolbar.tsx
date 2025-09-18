@@ -2,25 +2,14 @@
 
 import { Table } from "@tanstack/react-table";
 import { Input } from "@/components/ui/input";
-import { DataTableFacetedFilter } from "./data-table-faceted-filter";
-import { Award, ListTodo, Loader2, Send, XCircle } from "lucide-react";
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>;
 }
 
-const statusOptions = [
-    { value: 'Not Started', label: 'Not Started', icon: ListTodo },
-    { value: 'In Progress', label: 'In Progress', icon: Loader2 },
-    { value: 'Submitted', label: 'Submitted', icon: Send },
-    { value: 'Accepted', label: 'Accepted', icon: Award },
-    { value: 'Rejected', label: 'Rejected', icon: XCircle },
-]
-
 export function DataTableToolbar<TData>({
   table,
 }: DataTableToolbarProps<TData>) {
-  const isFiltered = table.getState().columnFilters.length > 0;
 
   return (
     <div className="flex items-center justify-between">
@@ -35,13 +24,6 @@ export function DataTableToolbar<TData>({
           }
           className="h-9 w-[150px] lg:w-[250px]"
         />
-        {table.getColumn("status") && (
-          <DataTableFacetedFilter
-            column={table.getColumn("status")}
-            title="Status"
-            options={statusOptions}
-          />
-        )}
       </div>
     </div>
   );
