@@ -111,13 +111,6 @@ export function DataTable<TData, TValue>({
                 <React.Fragment key={row.id}>
                 <TableRow
                   data-state={row.getIsSelected() && "selected"}
-                  onClick={(e) => {
-                    const target = e.target as HTMLElement;
-                    if (target.closest('[data-radix-popper-content-wrapper]') || target.closest('button') || target.closest('a') || target.closest('[type=checkbox]')) {
-                        return;
-                    }
-                    row.toggleExpanded();
-                  }}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}
