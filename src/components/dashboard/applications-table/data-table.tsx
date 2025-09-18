@@ -32,6 +32,7 @@ import { DataTableToolbar } from "./data-table-toolbar";
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  onAddNew: () => void;
 }
 
 const renderSubComponent = ({ row }: { row: any }) => {
@@ -47,6 +48,7 @@ const renderSubComponent = ({ row }: { row: any }) => {
 export function DataTable<TData, TValue>({
   columns,
   data,
+  onAddNew,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
@@ -84,7 +86,7 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="space-y-4 p-4">
-      <DataTableToolbar table={table} />
+      <DataTableToolbar table={table} onAddNew={onAddNew} />
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -116,6 +118,7 @@ export function DataTable<TData, TValue>({
                     <TableCell key={cell.id}
                       onClick={(e) => {
                          if (cell.column.id === 'documents' || cell.column.id === 'status' || cell.column.id === 'priority' || cell.column.id === 'actions' || cell.column.id === 'expander' || cell.column.id === 'link') {
+                            e.stopPropagation();
                             return;
                          }
                          row.toggleExpanded();

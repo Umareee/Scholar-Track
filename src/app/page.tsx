@@ -6,13 +6,11 @@ import {
   BookMarked,
   ListTodo,
   Loader2,
-  PlusCircle,
   Send,
   XCircle,
 } from "lucide-react";
 import { ApplicationStatus, ScholarshipApplication, Priority } from "@/lib/types";
 import { initialApplications } from "@/lib/data";
-import { Button } from "@/components/ui/button";
 import StatusCard from "@/components/dashboard/status-card";
 import { ApplicationDialog } from "@/components/dashboard/application-dialog";
 import { DataTable } from "@/components/dashboard/applications-table/data-table";
@@ -114,12 +112,6 @@ export default function Home() {
             <BookMarked className="h-7 w-7 text-primary" />
             <h1 className="text-2xl font-semibold text-foreground">ScholarTrack</h1>
         </div>
-        <div className="ml-auto">
-          <Button onClick={handleAddNew} variant="outline" className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground">
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Add Application
-          </Button>
-        </div>
       </header>
       <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
@@ -136,6 +128,7 @@ export default function Home() {
           <DataTable
             columns={columns({ onEdit: handleEdit, onDelete: handleDelete, onApplicationUpdate: handleSave })}
             data={sortedApplications}
+            onAddNew={handleAddNew}
           />
         </div>
       </main>

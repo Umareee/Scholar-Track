@@ -2,13 +2,17 @@
 
 import { Table } from "@tanstack/react-table";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { PlusCircle } from "lucide-react";
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>;
+  onAddNew: () => void;
 }
 
 export function DataTableToolbar<TData>({
   table,
+  onAddNew,
 }: DataTableToolbarProps<TData>) {
 
   return (
@@ -25,6 +29,10 @@ export function DataTableToolbar<TData>({
           className="h-9 w-[150px] lg:w-[250px]"
         />
       </div>
+       <Button onClick={onAddNew} size="sm" className="h-9">
+        <PlusCircle className="mr-2 h-4 w-4" />
+        Add Application
+      </Button>
     </div>
   );
 }
