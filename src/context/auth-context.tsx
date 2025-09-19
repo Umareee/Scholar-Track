@@ -67,6 +67,33 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (session?.user) {
           setUser(session.user);
           console.log('User updated in auth change:', session.user.id);
+          
+          // Ensure user profile exists in database
+          if (event === 'SIGNED_IN') {
+            const { data: profile, error } = await supabase
+              .from('user_applications')
+              .select('*')
+              .eq('user_id', session.user.id)
+              .maybeSingle();
+            
+            if (!profile) {
+              console.log('Creating user profile for:', session.user.id);
+              const { error: insertError } = await supabase
+                .from('user_applications')
+                .insert({ 
+                  user_id: session.user.id, 
+                  applications: initialApplications 
+                });
+              
+              if (insertError) {
+                console.error('Error creating user profile:', insertError);
+              } else {
+                console.log('User profile created successfully');
+              }
+            } else {
+              console.log('User profile already exists');
+            }
+          }
         } else {
           setUser(null);
           console.log('User cleared in auth change');

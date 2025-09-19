@@ -46,6 +46,7 @@ export default function Home() {
     if (user) {
       const fetchApplications = async () => {
         try {
+          console.log('Fetching applications for user:', user.id);
           const { data, error } = await supabase
             .from('user_applications')
             .select('applications')
@@ -56,10 +57,13 @@ export default function Home() {
             console.error('Error fetching applications:', error);
           }
           
+          console.log('Fetched data from database:', data);
+          
           if (data) {
+            console.log('Setting applications:', data.applications);
             setApplications(data.applications || []);
           } else {
-            // No data found, user profile might not exist yet
+            console.log('No data found, setting empty array');
             setApplications([]);
           }
         } catch (error) {
