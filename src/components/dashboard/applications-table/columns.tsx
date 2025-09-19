@@ -21,7 +21,18 @@ import {
 } from "@/components/ui/select";
 
 const DeadlineDisplay = ({ deadline }: { deadline: string }) => {
+  // Handle empty deadline
+  if (!deadline || deadline === '') {
+    return <span className="text-muted-foreground">No deadline set</span>;
+  }
+
   const deadlineDate = new Date(deadline);
+  
+  // Check if date is invalid
+  if (isNaN(deadlineDate.getTime())) {
+    return <span className="text-muted-foreground">Invalid date</span>;
+  }
+
   const now = new Date();
   const daysRemaining = differenceInDays(deadlineDate, now);
 

@@ -84,7 +84,7 @@ export function ApplicationDialog({
   const defaultValues: Partial<ApplicationFormValues> = application
     ? {
         ...application,
-        deadline: new Date(application.deadline),
+        deadline: application.deadline && application.deadline !== '' ? new Date(application.deadline) : undefined,
       }
     : {
         scholarshipName: "",

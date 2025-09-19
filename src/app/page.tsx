@@ -117,8 +117,24 @@ export default function Home() {
     const priorityOrder: Record<Priority, number> = { High: 1, Medium: 2, Low: 3, None: 4 };
     
     return [...applications].sort((a, b) => {
-      const aIsOverdue = isPast(new Date(a.deadline)) && differenceInDays(new Date(a.deadline), new Date()) < 0;
-      const bIsOverdue = isPast(new Date(b.deadline)) && differenceInDays(new Date(b.deadline), new Date()) < 0;
+      // Handle empty deadlines
+      const aHasDeadline = a.deadline && a.deadline !== '';
+      const bHasDeadline = b.deadline && b.deadline !== '';
+      
+      if (!aHasDeadline && !bHasDeadline) {
+        // Both have no deadline, sort by priority
+        const priorityA = priorityOrder[a.priority] || 5;
+        const priorityB = priorityOrder[b.priority] || 5;
+        return priorityA - priorityB;
+      }
+      
+      if (!aHasDeadline) return 1; // Items without deadlines go to bottom
+      if (!bHasDeadline) return -1; // Items with deadlines go to top
+      
+      const aDate = new Date(a.deadline);
+      const bDate = new Date(b.deadline);
+      const aIsOverdue = isPast(aDate) && differenceInDays(aDate, new Date()) < 0;
+      const bIsOverdue = isPast(bDate) && differenceInDays(bDate, new Date()) < 0;
 
       if (aIsOverdue && !bIsOverdue) return 1;
       if (!aIsOverdue && bIsOverdue) return -1;
@@ -130,7 +146,7 @@ export default function Home() {
         return priorityA - priorityB;
       }
       
-      return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
+      return aDate.getTime() - bDate.getTime();
     });
   }, [applications]);
 
