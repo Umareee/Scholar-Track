@@ -34,14 +34,26 @@ export default function Home() {
   React.useEffect(() => {
     if (user) {
       const fetchApplications = async () => {
-        const { data, error } = await supabase
-          .from('user_applications')
-          .select('applications')
-          .eq('user_id', user.id)
-          .single();
-        
-        if (data) {
-          setApplications(data.applications || []);
+        try {
+          const { data, error } = await supabase
+            .from('user_applications')
+            .select('applications')
+            .eq('user_id', user.id)
+            .maybeSingle();
+          
+          if (error) {
+            console.error('Error fetching applications:', error);
+          }
+          
+          if (data) {
+            setApplications(data.applications || []);
+          } else {
+            // No data found, user profile might not exist yet
+            setApplications([]);
+          }
+        } catch (error) {
+          console.error('Unexpected error:', error);
+          setApplications([]);
         }
         setLoading(false);
       };

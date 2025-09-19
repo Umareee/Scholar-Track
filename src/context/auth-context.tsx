@@ -37,16 +37,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             .from('user_applications')
             .select('*')
             .eq('user_id', session.user.id)
-            .single();
+            .maybeSingle();
           
-          if (profileError && profileError.code === 'PGRST116') {
+          if (!profile) {
             // User doesn't exist, create initial data
-            await supabase
+            const { error: insertError } = await supabase
               .from('user_applications')
               .insert({ 
                 user_id: session.user.id, 
                 applications: initialApplications 
               });
+            
+            if (insertError) {
+              console.error('Error creating user profile:', insertError);
+            }
           }
         }
         setLoading(false);
@@ -70,16 +74,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             .from('user_applications')
             .select('*')
             .eq('user_id', session.user.id)
-            .single();
+            .maybeSingle();
           
-          if (error && error.code === 'PGRST116') {
+          if (!profile) {
             // User doesn't exist, create initial data
-            await supabase
+            const { error: insertError } = await supabase
               .from('user_applications')
               .insert({ 
                 user_id: session.user.id, 
                 applications: initialApplications 
               });
+            
+            if (insertError) {
+              console.error('Error creating user profile:', insertError);
+            }
           }
         } else {
           setUser(null);
