@@ -74,10 +74,38 @@ export default function Home() {
 
   const updateSupabase = async (updatedApplications: ScholarshipApplication[]) => {
     if (user) {
-      await supabase
+      console.log('Updating Supabase with:', updatedApplications);
+      
+      // First try to update, if no rows affected, then insert
+      const { data: updateData, error: updateError } = await supabase
         .from('user_applications')
         .update({ applications: updatedApplications })
-        .eq('user_id', user.id);
+        .eq('user_id', user.id)
+        .select();
+      
+      if (updateError) {
+        console.error('Error updating Supabase:', updateError);
+        return;
+      }
+      
+      // If no rows were updated, create a new row
+      if (!updateData || updateData.length === 0) {
+        console.log('No existing row found, creating new one...');
+        const { data: insertData, error: insertError } = await supabase
+          .from('user_applications')
+          .insert({ 
+            user_id: user.id, 
+            applications: updatedApplications 
+          });
+        
+        if (insertError) {
+          console.error('Error inserting to Supabase:', insertError);
+        } else {
+          console.log('Successfully created new row in Supabase:', insertData);
+        }
+      } else {
+        console.log('Successfully updated Supabase:', updateData);
+      }
     }
   };
 

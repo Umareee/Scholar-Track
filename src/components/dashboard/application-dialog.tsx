@@ -46,12 +46,20 @@ const documentSchema = z.object({
 
 const formSchema = z.object({
   scholarshipName: z.string().min(2, "Scholarship name is required."),
-  university: z.string().min(2, "University name is required."),
-  country: z.string().min(2, "Country is required."),
-  deadline: z.date({ required_error: "A deadline date is required." }),
+  university: z.string().optional(),
+  country: z.string().optional(),
+  deadline: z.date().optional(),
   status: z.enum(ALL_STATUSES),
   priority: z.enum(ALL_PRIORITIES),
-  link: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')),
+  link: z.string().optional().refine((val) => {
+    if (!val || val === '') return true; // Allow empty string
+    try {
+      new URL(val);
+      return true;
+    } catch {
+      return false;
+    }
+  }, { message: "Please enter a valid URL or leave empty." }),
   documents: z.array(documentSchema),
   notes: z.string().optional(),
 });
@@ -107,7 +115,9 @@ export function ApplicationDialog({
     const newOrUpdatedApplication: ScholarshipApplication = {
       id: application?.id || crypto.randomUUID(),
       ...values,
-      deadline: values.deadline.toISOString(),
+      university: values.university || "",
+      country: values.country || "",
+      deadline: values.deadline ? values.deadline.toISOString() : "",
       link: values.link || "",
       notes: values.notes || "",
     };

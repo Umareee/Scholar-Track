@@ -20,11 +20,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let mounted = true;
+    
     // Get initial user session
     const getInitialSession = async () => {
       try {
         console.log('Getting initial session...');
         const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (!mounted) return;
+        
         if (error) {
           console.error('Session error:', error);
           setLoading(false);
@@ -44,7 +49,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         console.log('Auth loading set to false');
       } catch (error) {
         console.error('Auth initialization error:', error);
-        setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     };
 
@@ -53,38 +60,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth state change:', event, session?.user?.id);
+        console.log('Auth state change:', event, session?.user?.id || 'no user');
+        
+        if (!mounted) return;
         
         if (session?.user) {
           setUser(session.user);
-          // Check if user profile exists, if not create initial data
-          const { data: profile, error } = await supabase
-            .from('user_applications')
-            .select('*')
-            .eq('user_id', session.user.id)
-            .maybeSingle();
-          
-          if (!profile) {
-            // User doesn't exist, create initial data
-            const { error: insertError } = await supabase
-              .from('user_applications')
-              .insert({ 
-                user_id: session.user.id, 
-                applications: initialApplications 
-              });
-            
-            if (insertError) {
-              console.error('Error creating user profile:', insertError);
-            }
-          }
+          console.log('User updated in auth change:', session.user.id);
         } else {
           setUser(null);
+          console.log('User cleared in auth change');
         }
         setLoading(false);
+        console.log('Loading set to false in auth change');
       }
     );
 
     return () => {
+      mounted = false;
       subscription.unsubscribe();
     };
   }, []);
