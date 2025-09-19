@@ -2,9 +2,8 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { onAuthStateChanged, User, signOut as firebaseSignOut } from 'firebase/auth';
-import { auth, db } from '@/lib/firebase';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { User, AuthError } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase';
 import { initialApplications } from '@/lib/data';
 import { Loader2 } from 'lucide-react';
 
@@ -21,26 +20,68 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        const userDocRef = doc(db, 'users', user.uid);
-        const userDoc = await getDoc(userDocRef);
-        if (!userDoc.exists()) {
-          // Create initial data for new user
-          await setDoc(userDocRef, { applications: initialApplications });
+    // Get initial user session
+    const getInitialSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        setUser(session.user);
+        // Check if user profile exists, if not create initial data
+        const { data: profile, error } = await supabase
+          .from('user_applications')
+          .select('*')
+          .eq('user_id', session.user.id)
+          .single();
+        
+        if (error && error.code === 'PGRST116') {
+          // User doesn't exist, create initial data
+          await supabase
+            .from('user_applications')
+            .insert({ 
+              user_id: session.user.id, 
+              applications: initialApplications 
+            });
         }
-        setUser(user);
-      } else {
-        setUser(null);
       }
       setLoading(false);
-    });
+    };
 
-    return () => unsubscribe();
+    getInitialSession();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (session?.user) {
+          setUser(session.user);
+          // Check if user profile exists, if not create initial data
+          const { data: profile, error } = await supabase
+            .from('user_applications')
+            .select('*')
+            .eq('user_id', session.user.id)
+            .single();
+          
+          if (error && error.code === 'PGRST116') {
+            // User doesn't exist, create initial data
+            await supabase
+              .from('user_applications')
+              .insert({ 
+                user_id: session.user.id, 
+                applications: initialApplications 
+              });
+          }
+        } else {
+          setUser(null);
+        }
+        setLoading(false);
+      }
+    );
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const logout = async () => {
-    await firebaseSignOut(auth);
+    await supabase.auth.signOut();
   };
 
   if (loading) {

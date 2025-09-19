@@ -109,6 +109,7 @@ export function ApplicationDialog({
       ...values,
       deadline: values.deadline.toISOString(),
       link: values.link || "",
+      notes: values.notes || "",
     };
     onSave(newOrUpdatedApplication);
     onOpenChange(false);

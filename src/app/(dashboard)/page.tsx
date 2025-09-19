@@ -19,8 +19,7 @@ import { DataTable } from "@/components/dashboard/applications-table/data-table"
 import { columns } from "@/components/dashboard/applications-table/columns";
 import { differenceInDays, isPast } from "date-fns";
 import { useAuth } from "@/context/auth-context";
-import { db } from "@/lib/firebase";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { supabase } from "@/lib/supabase";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
@@ -35,10 +34,14 @@ export default function Home() {
   React.useEffect(() => {
     if (user) {
       const fetchApplications = async () => {
-        const userDocRef = doc(db, 'users', user.uid);
-        const userDoc = await getDoc(userDocRef);
-        if (userDoc.exists()) {
-          setApplications(userDoc.data().applications || []);
+        const { data, error } = await supabase
+          .from('user_applications')
+          .select('applications')
+          .eq('user_id', user.id)
+          .single();
+        
+        if (data) {
+          setApplications(data.applications || []);
         }
         setLoading(false);
       };
@@ -46,10 +49,12 @@ export default function Home() {
     }
   }, [user]);
 
-  const updateFirestore = async (updatedApplications: ScholarshipApplication[]) => {
+  const updateSupabase = async (updatedApplications: ScholarshipApplication[]) => {
     if (user) {
-      const userDocRef = doc(db, 'users', user.uid);
-      await setDoc(userDocRef, { applications: updatedApplications }, { merge: true });
+      await supabase
+        .from('user_applications')
+        .update({ applications: updatedApplications })
+        .eq('user_id', user.id);
     }
   };
 
@@ -94,7 +99,7 @@ export default function Home() {
   const handleDelete = (id: string) => {
     const updatedApplications = applications.filter((app) => app.id !== id);
     setApplications(updatedApplications);
-    updateFirestore(updatedApplications);
+    updateSupabase(updatedApplications);
   };
 
   const handleSave = (appData: ScholarshipApplication) => {
@@ -105,7 +110,7 @@ export default function Home() {
       updatedApplications = [...applications, appData];
     }
     setApplications(updatedApplications);
-    updateFirestore(updatedApplications);
+    updateSupabase(updatedApplications);
     setEditingApplication(null);
   };
   
@@ -136,7 +141,7 @@ export default function Home() {
             <DropdownMenuTrigger asChild>
                 <Button variant="secondary" size="icon" className="rounded-full">
                     <Avatar>
-                        <AvatarImage src={user?.photoURL || undefined} alt={user?.displayName || "User"} />
+                        <AvatarImage src={user?.user_metadata?.avatar_url || undefined} alt={user?.user_metadata?.full_name || "User"} />
                         <AvatarFallback>
                             <UserIcon />
                         </AvatarFallback>
