@@ -22,27 +22,38 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     // Get initial user session
     const getInitialSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        setUser(session.user);
-        // Check if user profile exists, if not create initial data
-        const { data: profile, error } = await supabase
-          .from('user_applications')
-          .select('*')
-          .eq('user_id', session.user.id)
-          .single();
-        
-        if (error && error.code === 'PGRST116') {
-          // User doesn't exist, create initial data
-          await supabase
-            .from('user_applications')
-            .insert({ 
-              user_id: session.user.id, 
-              applications: initialApplications 
-            });
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) {
+          console.error('Session error:', error);
+          setLoading(false);
+          return;
         }
+        
+        if (session?.user) {
+          setUser(session.user);
+          // Check if user profile exists, if not create initial data
+          const { data: profile, error: profileError } = await supabase
+            .from('user_applications')
+            .select('*')
+            .eq('user_id', session.user.id)
+            .single();
+          
+          if (profileError && profileError.code === 'PGRST116') {
+            // User doesn't exist, create initial data
+            await supabase
+              .from('user_applications')
+              .insert({ 
+                user_id: session.user.id, 
+                applications: initialApplications 
+              });
+          }
+        }
+        setLoading(false);
+      } catch (error) {
+        console.error('Auth initialization error:', error);
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     getInitialSession();
@@ -50,6 +61,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('Auth state change:', event, session?.user?.id);
+        
         if (session?.user) {
           setUser(session.user);
           // Check if user profile exists, if not create initial data

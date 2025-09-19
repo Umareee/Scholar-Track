@@ -46,6 +46,7 @@ export default function SignupPage() {
       
       if (data.user) {
         router.push('/');
+        router.refresh();
       }
     } catch (error: any) {
        toast({
