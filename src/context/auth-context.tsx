@@ -23,6 +23,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // Get initial user session
     const getInitialSession = async () => {
       try {
+        console.log('Getting initial session...');
         const { data: { session }, error } = await supabase.auth.getSession();
         if (error) {
           console.error('Session error:', error);
@@ -30,30 +31,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           return;
         }
         
+        console.log('Initial session:', session?.user?.id || 'No user');
+        
         if (session?.user) {
           setUser(session.user);
-          // Check if user profile exists, if not create initial data
-          const { data: profile, error: profileError } = await supabase
-            .from('user_applications')
-            .select('*')
-            .eq('user_id', session.user.id)
-            .maybeSingle();
-          
-          if (!profile) {
-            // User doesn't exist, create initial data
-            const { error: insertError } = await supabase
-              .from('user_applications')
-              .insert({ 
-                user_id: session.user.id, 
-                applications: initialApplications 
-              });
-            
-            if (insertError) {
-              console.error('Error creating user profile:', insertError);
-            }
-          }
+          console.log('User set in state:', session.user.id);
+        } else {
+          setUser(null);
+          console.log('No user found, setting to null');
         }
         setLoading(false);
+        console.log('Auth loading set to false');
       } catch (error) {
         console.error('Auth initialization error:', error);
         setLoading(false);

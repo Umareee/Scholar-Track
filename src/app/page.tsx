@@ -35,7 +35,9 @@ export default function Home() {
   const [editingApplication, setEditingApplication] = React.useState<ScholarshipApplication | null>(null);
 
   useEffect(() => {
+    console.log('Page effect - authLoading:', authLoading, 'user:', user?.id || 'null');
     if (!authLoading && !user) {
+      console.log('Redirecting to login...');
       router.replace('/login');
     }
   }, [user, authLoading, router]);
@@ -135,7 +137,10 @@ export default function Home() {
     setEditingApplication(null);
   };
   
-  if (authLoading || loading) {
+  console.log('Render - authLoading:', authLoading, 'loading:', loading, 'user:', user?.id || 'null');
+
+  if (authLoading) {
+    console.log('Showing spinner due to authLoading');
     return (
       <div className="flex h-screen w-full items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -144,7 +149,17 @@ export default function Home() {
   }
 
   if (!user) {
+    console.log('No user, returning null');
     return null; // Will redirect to login
+  }
+
+  if (loading) {
+    console.log('Showing spinner due to loading');
+    return (
+      <div className="flex h-screen w-full items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
   }
 
   const statusCards = [
